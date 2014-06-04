@@ -1,3 +1,13 @@
+# Description:
+#   Send JIRA Activity Stream to a room.
+#
+# Dependencies:
+#   ent, feedparser
+#
+# Configuration:
+#   HUBOT_JIRA_STREAM_ROOM
+#   HUBOT_JIRA_STREAM_URL
+
 FeedParser      = require('feedparser')
 ent             = require('ent')
 {EventEmitter}  = require('events')
