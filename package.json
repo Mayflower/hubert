@@ -37,7 +37,9 @@
     "jquery": "",
     "url": "",
     "querystring": "",
-    "gitio2": "2.0.0"
+    "gitio2": "2.0.0",
+    "ent": "",
+    "feedparser": ""
   },
 
   "engines": {
