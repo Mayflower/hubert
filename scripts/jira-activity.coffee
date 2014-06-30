@@ -14,7 +14,7 @@ ent             = require('ent')
 
 class ActivityStream extends EventEmitter
   constructor: (@url, @robot) ->
-    @robot.logger.info("ActivityStream for #{@url}")
+    @robot.logger.info("ActivityStream from #{@url} to #{process.env.HUBOT_JIRA_STREAM_ROOM}")
     self      = this
     self.guid = "urn:uuid:dead-beef-cafe-babe"
 
@@ -22,7 +22,6 @@ class ActivityStream extends EventEmitter
       self.guid = guid
 
     @on 'activities', (activities) ->
-
       activities.forEach (activity) ->
         if activity.guid is self.guid
           activities.splice(activities.indexOf(activity), activities.length-activities.indexOf(activity))
@@ -57,14 +56,14 @@ class ActivityStream extends EventEmitter
 
 module.exports = (@robot) ->
   parser = new FeedParser
-  stream = new ActivityStream process.env.HUBOT_JIRA_STREAM_URL,
-                              @robot
+  stream = new ActivityStream process.env.HUBOT_JIRA_STREAM_URL, @robot
 
   parser.on 'end', (articles) ->
     stream.parse articles
     parser._reset
 
   run = (stream, parser) ->
+    @robot.logger.info("Running for #{stream.url}")
     parser.parseUrl(stream.url)
 
-  setInterval (-> run stream, parser), 30000
+  setInterval (-> run stream, parser), 10 * 1000
