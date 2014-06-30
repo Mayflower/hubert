@@ -16,10 +16,13 @@ class ActivityStream extends EventEmitter
   constructor: (@url, @robot) ->
     @robot.logger.info("ActivityStream from #{@url} to #{process.env.HUBOT_JIRA_STREAM_ROOM}")
     self      = this
-    self.guid = "urn:uuid:dead-beef-cafe-babe"
+
+    self.robot.brain.on 'loaded', =>
+      self.guid = self.robot.brain.data.jira_stream_guid
 
     @on 'guid', (guid) ->
       self.guid = guid
+      self.robot.brain.data.jira_stream_guid = guid
 
     @on 'activities', (activities) ->
       activities.forEach (activity) ->
@@ -55,6 +58,9 @@ class ActivityStream extends EventEmitter
     @emit 'activities', activities
 
 module.exports = (@robot) ->
+  robot.brain.on 'loaded', =>
+    robot.brain.data.jira_stream_guid ||= "urn:uuid:dead-beef-cafe-babe"
+
   parser = new FeedParser
   stream = new ActivityStream process.env.HUBOT_JIRA_STREAM_URL, @robot
 
