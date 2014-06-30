@@ -3,4 +3,5 @@
 cd /var/lib/hubot
 git pull
 npm install
-service hubot restart
+service hubot stop
+service hubot start
