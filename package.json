@@ -32,6 +32,7 @@
     "hubot-business-cat": "1.0.x",
     "hubot-principles": "",
     "hubot-devops-reactions": "",
+    "hubot-reaction": "",
     "htmlparser": "1.7.6",
     "soupselect": "0.2.0",
     "clark": "0.0.5",
