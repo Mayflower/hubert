@@ -29,6 +29,7 @@
     "hubot-xmpp":    ">= 0.1",
     "hubot-scripts": ">= 2.5.0 < 3.0.0",
     "hubot-google-hangouts": "",
+    "hubot-business-cat": "1.0.x",
     "htmlparser": "1.7.6",
     "soupselect": "0.2.0",
     "clark": "0.0.5",
