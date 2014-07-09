@@ -33,6 +33,7 @@
     "hubot-principles": "",
     "hubot-devops-reactions": "",
     "hubot-reaction": "",
+    "hubot-explainshell": "",
     "htmlparser": "1.7.6",
     "soupselect": "0.2.0",
     "clark": "0.0.5",
