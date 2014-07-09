@@ -1,1 +1,9 @@
-["hubot-google-hangouts", "hubot-business-cat", "hubot-principles", "hubot-devops-reactions", "hubot-reaction", "hubot-explainshell"]
+[
+    "hubot-google-hangouts",
+    "hubot-business-cat",
+    "hubot-principles",
+    "hubot-devops-reactions",
+    "hubot-reaction",
+    "hubot-explainshell",
+    "hubot-http-status"
+]
