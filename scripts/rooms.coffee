@@ -43,7 +43,5 @@ module.exports = (robot) ->
 
   robot.respond /leave ?([^ ]*)?/i, (msg) ->
     room = msg.match[1] || msg.message.user.room
-    for _room, i in robot.brain.data.rooms
-      if _room == room
-        robot.brain.data.rooms = robot.brain.data.rooms.slice i, 1
+    robot.brain.data.rooms = room.brain.data.rooms.filter (it) -> it isnt room
     leave room
