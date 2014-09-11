@@ -36,9 +36,10 @@ module.exports = (robot) ->
     for room in robot.brain.data.rooms
       join room
 
-  robot.respond /join ([^ ]*)/i, (msg) ->
+  robot.respond /join ([^@]+)@?([^@]+)?/i, (msg) ->
     room = msg.match[1]
-    robot.brain.data.rooms.push room
+    domain = msg.match[2] || msg.message.user.room.split('@')[1]
+    robot.brain.data.rooms.push "#{room}@#{domain}"
     join room
 
   robot.respond /leave ?([^ ]*)?/i, (msg) ->
