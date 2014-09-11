@@ -15,6 +15,7 @@ _ = require 'underscore'
 module.exports = (robot) ->
   join = (room) ->
     robot.logger.info("Joining #{room}")
+    robot.brain.data.rooms.push room
 
     _room =
       jid: room
@@ -23,6 +24,7 @@ module.exports = (robot) ->
 
   leave = (room) ->
     robot.logger.info("Leaving #{room}")
+    robot.brain.data.rooms = robot.brain.data.rooms.filter (it) -> it isnt room
 
     _room =
       jid: room
@@ -39,10 +41,8 @@ module.exports = (robot) ->
   robot.respond /join ([^@]+)@?([^@]+)?/i, (msg) ->
     room = msg.match[1]
     domain = msg.match[2] || msg.message.user.room.split('@')[1]
-    robot.brain.data.rooms.push "#{room}@#{domain}"
-    join room
+    join "#{room}@#{domain}"
 
   robot.respond /leave ?([^ ]*)?/i, (msg) ->
     room = msg.match[1] || msg.message.user.room
-    robot.brain.data.rooms = robot.brain.data.rooms.filter (it) -> it isnt room
     leave room
