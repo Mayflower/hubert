@@ -8,7 +8,7 @@
 #  None
 #
 # Commands:
-#  join <room> - Join room
+#  join [room] - Join room
 #  leave [room] - Leave room
 _ = require 'underscore'
 
@@ -43,5 +43,5 @@ module.exports = (robot) ->
 
   robot.respond /leave ?([^ ]*)?/i, (msg) ->
     room = msg.match[1] || msg.message.user.room
-    robot.brain.data.rooms = room.brain.data.rooms.filter (it) -> it isnt room
+    robot.brain.data.rooms = robot.brain.data.rooms.filter (it) -> it isnt room
     leave room
