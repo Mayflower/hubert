@@ -16,6 +16,7 @@ module.exports = (robot) ->
   join = (room) ->
     robot.logger.info("Joining #{room}")
     robot.brain.data.rooms.push room
+    robot.brain.save
 
     _room =
       jid: room
@@ -25,6 +26,7 @@ module.exports = (robot) ->
   leave = (room) ->
     robot.logger.info("Leaving #{room}")
     robot.brain.data.rooms = robot.brain.data.rooms.filter (it) -> it isnt room
+    robot.brain.save
 
     _room =
       jid: room
@@ -34,6 +36,7 @@ module.exports = (robot) ->
   robot.brain.on 'loaded', =>
     robot.brain.data.rooms ||= []
     robot.brain.data.rooms = _.union(robot.brain.data.rooms, process.env.HUBOT_XMPP_ROOMS.split(','))
+    robot.brain.save
 
     for room in robot.brain.data.rooms
       join room
