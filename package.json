@@ -34,6 +34,7 @@
     "hubot-reaction": "",
     "hubot-explainshell": "",
     "hubot-http-status": "",
+    "hubot-tell": "",
     "htmlparser": "1.7.6",
     "soupselect": "0.2.0",
     "clark": "0.0.5",
