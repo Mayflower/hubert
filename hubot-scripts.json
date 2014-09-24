@@ -26,7 +26,6 @@
   "github-commits.coffee",
   "github-pull-request-notifier.coffee",
   "github-status.coffee",
-  "gitlab.coffee",
   "good-night.coffee",
   "google.coffee",
   "graphite.coffee",
