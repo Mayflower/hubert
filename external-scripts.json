@@ -4,5 +4,7 @@
     "hubot-principles",
     "hubot-reaction",
     "hubot-explainshell",
-    "hubot-http-status"
+    "hubot-http-status",
+    "hubot-tell",
+    "hubot-auth"
 ]
