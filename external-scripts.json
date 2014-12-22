@@ -7,5 +7,6 @@
     "hubot-http-status",
     "hubot-tell",
     "hubot-auth",
-    "hubot-travisci-notifier"
+    "hubot-travisci-notifier",
+    "hubot-seen"
 ]

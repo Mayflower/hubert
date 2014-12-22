@@ -38,6 +38,7 @@
     "hubot-principles": "",
     "hubot-reaction": "",
     "hubot-scripts": ">= 2.5.0 < 3.0.0",
+    "hubot-seen": "^0.2.2",
     "hubot-tell": "",
     "hubot-travisci-notifier": "git://github.com/mayflower/hubot-travisci-notifier.git",
     "hubot-xmpp": ">= 0.1",
