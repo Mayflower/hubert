@@ -8,6 +8,5 @@
     "hubot-tell",
     "hubot-auth",
     "hubot-travisci-notifier",
-    "hubot-seen",
-    "hubot-sensu"
+    "hubot-seen"
 ]
