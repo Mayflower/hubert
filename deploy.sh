@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 (tail -n1 <&0 | jq '.ref' | grep '/master' >/dev/null 2>&1) || exit 1
 
