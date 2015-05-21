@@ -13,9 +13,9 @@ ent             = require('ent')
 {EventEmitter}  = require('events')
 
 class ActivityStream extends EventEmitter
-  constructor: (@url, @robot) ->
-    @robot.logger.info("ActivityStream from #{@url} to #{process.env.HUBOT_JIRA_STREAM_ROOM}")
-    self      = this
+  constructor: (@url, @robot, @room) ->
+    @robot.logger.info("ActivityStream from #{@url} to #{@room}")
+    self = this
 
     self.robot.brain.on 'loaded', =>
       self.guid = self.robot.brain.data.jira_stream_guid
@@ -24,16 +24,17 @@ class ActivityStream extends EventEmitter
       self.guid = guid
       self.robot.brain.data.jira_stream_guid = guid
 
-    @on 'activities', (activities) ->
+    @on 'activities', (activities) =>
+      @robot.logger.info(@room)
       activities.forEach (activity) ->
         if activity.guid is self.guid
-          activities.splice(activities.indexOf(activity), activities.length-activities.indexOf(activity))
+          activities.splice(activities.indexOf(activity), activities.length - activities.indexOf(activity))
 
       activities.reverse()
-      activities.forEach (activity) ->
+      activities.forEach (activity) =>
         sendto =
           type: 'groupchat'
-          room: process.env.HUBOT_JIRA_STREAM_ROOM
+          room: @room
 
         self.robot.send sendto, "#{activity.title} <#{activity.link}>#{activity.description()}\n"
 
@@ -48,8 +49,8 @@ class ActivityStream extends EventEmitter
         description: ->
           if article.description != null
             "\n" + ent.decode(article.description.replace(/<(?:.|\n)*?>/gm, '').replace(/\ \ \ /, ' '))
-           else
-             ""
+          else
+            ""
         link: article.link
         guid: article.guid
 
@@ -61,15 +62,24 @@ module.exports = (@robot) ->
   robot.brain.on 'loaded', =>
     robot.brain.data.jira_stream_guid ||= "urn:uuid:dead-beef-cafe-babe"
 
-  parser = new FeedParser
-  stream = new ActivityStream process.env.HUBOT_JIRA_STREAM_URL, @robot
+  streamHandlers = process.env.HUBOT_JIRA_STREAM_URL.split(',').map((url_room_data) ->
+    [url, room] = url_room_data.split('->')
+    stream = new ActivityStream(url, @robot, room)
+    parser = new FeedParser
+    parser.on 'end', (articles) ->
+      stream.parse articles
+      parser._reset
 
-  parser.on 'end', (articles) ->
-    stream.parse articles
-    parser._reset
+    return {
+      stream: stream
+      parser: parser
+    }
+  )
 
   run = (stream, parser) ->
     @robot.logger.info("Running for #{stream.url}")
     parser.parseUrl(stream.url)
 
-  setInterval (-> run stream, parser), 10 * 1000
+  streamHandlers.forEach((streamHandler) ->
+    setInterval((-> run streamHandler.stream, streamHandler.parser), 10 * 1000)
+  )
