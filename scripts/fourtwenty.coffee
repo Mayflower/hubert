@@ -1,3 +1,12 @@
+# Description:
+#   Time to 420
+#
+# Dependencies:
+#   None
+#
+# Commands:
+#   hubot 420 - Sends a message to all hubot rooms.
+
 module.exports = (robot) ->
   robot.respond /(fourtwenty|420)\?/, (msg) ->
     msg.http('http://its.fourtwenty.in/next').get() (err,res,body) ->
