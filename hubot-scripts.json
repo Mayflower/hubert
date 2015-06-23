@@ -37,7 +37,6 @@
   "http-say.coffee",
   "isup.coffee",
   "jira.coffee",
-  "jira-issues.coffee",
   "kittens.coffee",
   "meme_captain.coffee",
   "ping.coffee",
