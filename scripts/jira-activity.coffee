@@ -17,12 +17,12 @@ class ActivityStream extends EventEmitter
     @robot.logger.info("ActivityStream from #{@url} to #{@room}")
     self = this
 
-    self.robot.brain.on 'loaded', =>
-      self.guid = self.robot.brain.data.jira_stream_guid
+    @robot.brain.on 'loaded', =>
+      self.guid = @robot.brain.data.jira_activity[@room]
 
     @on 'guid', (guid) ->
       self.guid = guid
-      self.robot.brain.data.jira_stream_guid = guid
+      @robot.brain.data.jira_activity[@room] = guid
 
     @on 'activities', (activities) =>
       activities.forEach (activity) ->
@@ -35,7 +35,7 @@ class ActivityStream extends EventEmitter
           type: 'groupchat'
           room: @room
 
-        self.robot.send sendto, "#{activity.title} <#{activity.link}>#{activity.description()}\n"
+        @robot.send sendto, "#{activity.title} <#{activity.link}>#{activity.description()}\n"
 
         if activities.indexOf(activity) is activities.length-1
           self.emit 'guid', activity.guid
@@ -58,8 +58,9 @@ class ActivityStream extends EventEmitter
     @emit 'activities', activities
 
 module.exports = (@robot) ->
-  robot.brain.on 'loaded', =>
-    robot.brain.data.jira_stream_guid ||= "urn:uuid:dead-beef-cafe-babe"
+  # Internal: Initialize our brain
+  @robot.brain.on 'loaded', =>
+    @robot.brain.data.jira_activity ||= {}
 
   streamHandlers = process.env.HUBOT_JIRA_STREAM_URL.split(',').map((url_room_data) ->
     [url, room] = url_room_data.split('->')
