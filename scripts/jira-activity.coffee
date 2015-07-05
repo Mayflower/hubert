@@ -25,7 +25,6 @@ class ActivityStream extends EventEmitter
       self.robot.brain.data.jira_stream_guid = guid
 
     @on 'activities', (activities) =>
-      @robot.logger.info(@room)
       activities.forEach (activity) ->
         if activity.guid is self.guid
           activities.splice(activities.indexOf(activity), activities.length - activities.indexOf(activity))

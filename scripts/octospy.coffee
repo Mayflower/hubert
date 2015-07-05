@@ -14,7 +14,7 @@
 #   HUBOT_GITHUB_TOKEN
 #
 # Commands:
-#   hubot octospy <repo> [event_type] - Start watching events for the repo, default push
+#   hubot octospy <repo> [event_type] - Start watching events for the repo, default all sane events
 #   hubot octospy stop <repo> [event_type] - Stop watching events for the repo
 #   hubot octospying - Show what you're spying on
 #   hubot octospy events - List the events you can watch
@@ -189,6 +189,8 @@ views =
     """
       {{sender.login}} turned {{repo_name}} public
     """
+  all:
+    "dummy"
 
 
 
@@ -279,20 +281,7 @@ module.exports = (robot) ->
           else
             robot.logger.warning "Failed to unsubscribe to #{repo} #{event} events on #{github_url}: #{body} (Status Code: #{res.statusCode})"
 
-  # Public: Subsribe to an event type for a repository
-  #
-  # repo       - The repository name (ex. 'github/hubot'
-  # event      - The event type to stop watching (default: 'push')
-  # github_url - The base github URL (default: 'github.com'
-  robot.respond /octospy ([^ ]+\/[^ ]+) ?([^ ]*)? ?([^ ]*)?/i, (msg) ->
-    repo = msg.match[1]
-    event = msg.match[2] || 'push'
-    github_url = msg.match[3] || 'github.com'
-
-    # Don't go any further if we don't know about the event type
-    if ! _.include(( known for known of views ), event)
-      return msg.reply "Sorry, I don't know about #{event} events"
-
+  listen = (github_url, repo, event, msg) ->
     # Convenience accessor
     listeners = robot.brain.data.octospy[github_url]?[repo]?[event]
 
@@ -334,6 +323,29 @@ module.exports = (robot) ->
               robot.logger.warning "#{JSON.stringify body}"
     else
       addListener()
+
+
+  # Public: Subsribe to an event type for a repository
+  #
+  # repo       - The repository name (ex. 'github/hubot'
+  # event      - The event type to stop watching (default: 'all')
+  # github_url - The base github URL (default: 'github.com'
+  robot.respond /octospy ([^ ]+\/[^ ]+) ?([^ ]*)? ?([^ ]*)?/i, (msg) ->
+    repo = msg.match[1]
+    event = msg.match[2] || 'all'
+    github_url = msg.match[3] || 'github.com'
+
+    # Don't go any further if we don't know about the event type
+    if ! _.include(( known for known of views ), event)
+      return msg.reply "Sorry, I don't know about #{event} events"
+
+    if event == 'all'
+      [
+        'push', 'issues', 'issue_comment', 'commit_comment',
+        'pull_request', 'pull_request_review_comment', 'watch', 'fork'
+      ].map((e) -> listen(github_url, repo, e, msg))
+    else
+      listen(github_url, repo, event, msg)
 
   # Public: Repond to POSTs from github
   #
