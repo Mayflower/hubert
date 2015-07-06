@@ -15,18 +15,11 @@ ent             = require('ent')
 class ActivityStream extends EventEmitter
   constructor: (@url, @robot, @room) ->
     @robot.logger.info("ActivityStream from #{@url} to #{@room}")
-    self = this
-
-    @robot.brain.on 'loaded', =>
-      self.guid = @robot.brain.data.jira_activity[@room]
-
-    @on 'guid', (guid) ->
-      self.guid = guid
-      @robot.brain.data.jira_activity[@room] = guid
 
     @on 'activities', (activities) =>
-      activities.forEach (activity) ->
-        if activity.guid is self.guid
+      activities.forEach (activity) =>
+
+        if activity.guid is @robot.brain.data.jira_activity.guid[@room]
           activities.splice(activities.indexOf(activity), activities.length - activities.indexOf(activity))
 
       activities.reverse()
@@ -38,7 +31,7 @@ class ActivityStream extends EventEmitter
         @robot.send sendto, "#{activity.title} <#{activity.link}>#{activity.description()}\n"
 
         if activities.indexOf(activity) is activities.length-1
-          self.emit 'guid', activity.guid
+          @robot.brain.data.jira_activity.guid[@room] = activity.guid
 
   parse: (articles) ->
     activities = []
@@ -57,29 +50,88 @@ class ActivityStream extends EventEmitter
 
     @emit 'activities', activities
 
+
+build_url = (keys) ->
+  url = process.env.HUBOT_JIRA_URL.split('://')[1]
+  user = process.env.HUBOT_JIRA_USER
+  password = process.env.HUBOT_JIRA_PASSWORD
+  query = keys.map((key) -> "key+IS+#{key}").join("+OR+")
+
+  "https://#{user}:#{password}@#{url}/activity?maxResults=10&os_authType=basic&streams=#{query}"
+
+
+buildHandler = (room, keys) ->
+  url = build_url(keys)
+  stream = new ActivityStream(url, @robot, room)
+  parser = new FeedParser
+  parser.on 'end', (articles) ->
+    stream.parse articles
+    parser._reset
+
+  {
+    stream: stream
+    parser: parser
+    room: room
+  }
+
+
 module.exports = (@robot) ->
-  # Internal: Initialize our brain
-  @robot.brain.on 'loaded', =>
-    @robot.brain.data.jira_activity ||= {}
+  timeouts = {}
 
-  streamHandlers = process.env.HUBOT_JIRA_STREAM_URL.split(',').map((url_room_data) ->
-    [url, room] = url_room_data.split('->')
-    stream = new ActivityStream(url, @robot, room)
-    parser = new FeedParser
-    parser.on 'end', (articles) ->
-      stream.parse articles
-      parser._reset
-
-    return {
-      stream: stream
-      parser: parser
-    }
-  )
-
-  run = (stream, parser) ->
-    @robot.logger.info("Running for #{stream.url}")
+  run = (handler) ->
+    {stream, parser, room} = handler
     parser.parseUrl(stream.url)
+    timeouts[room] = setTimeout((() -> run(handler)), 10 * 1000)
 
-  streamHandlers.forEach((streamHandler) ->
-    setInterval((-> run streamHandler.stream, streamHandler.parser), 10 * 1000)
-  )
+  @robot.respond /jira watch ([A-Z]+)/, (msg) ->
+    key = msg.match[1]
+    room = msg.message.user.room
+    currentKeys = @robot.brain.data.jira_activity.subscription[room] || []
+    sendto =
+      type: 'groupchat'
+      room: room
+
+    if key in currentKeys
+      @robot.send(sendto, "I am already watching #{key} in #{room}")
+    else
+      clearTimeout(timeouts[room])
+      keys = currentKeys.concat(key)
+      run(buildHandler(room, keys))
+      @robot.brain.data.jira_activity.subscription[room] = keys
+      @robot.send(sendto, "I've started watching #{key} in #{room}")
+
+  @robot.respond /jira stop watching ([A-Z]+)/, (msg) ->
+    key = msg.match[1]
+    room = msg.message.user.room
+    currentKeys = @robot.brain.data.jira_activity.subscription[room]
+    sendto =
+      type: 'groupchat'
+      room: room
+
+    if key not in currentKeys
+      @robot.send(sendto, "I am currently not watching #{key} in #{room}")
+    else
+      clearTimeout(timeouts[room])
+      keys = currentKeys.filter((k) -> k != key)
+      run(buildHandler(room, keys))
+      @robot.brain.data.jira_activity.subscription[room] = keys
+      @robot.send(sendto, "I've stopped watching #{key} in #{room}")
+
+  @robot.respond /jira watching/, (msg) ->
+    room = msg.message.user.room
+    currentKeys = @robot.brain.data.jira_activity.subscription[room]
+    sendto =
+      type: 'groupchat'
+      room: room
+    @robot.send(sendto, "I am currently watching #{currentKeys.join(', ')} in #{room}")
+
+  @robot.brain.on 'loaded', =>
+    # Internal: Initialize our brain
+    @robot.brain.data.jira_activity ||= {}
+    @robot.brain.data.jira_activity.guid ||= {}
+    @robot.brain.data.jira_activity.subscription ||= {}
+
+    Object.keys(@robot.brain.data.jira_activity.subscription).forEach((room) ->
+      keys = @robot.brain.data.jira_activity.subscription[room]
+      run(buildHandler(room, keys))
+    )
