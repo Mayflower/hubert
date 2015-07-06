@@ -83,7 +83,7 @@ module.exports = (@robot) ->
     parser.parseUrl(stream.url)
     timeouts[room] = setTimeout((() -> run(handler)), 10 * 1000)
 
-  @robot.respond /jira watch ([A-Z]+)/, (msg) ->
+  @robot.respond /jira watch ([A-Z0-9]+)/, (msg) ->
     key = msg.match[1]
     room = msg.message.user.room
     currentKeys = @robot.brain.data.jira_activity.subscription[room] || []
@@ -100,7 +100,7 @@ module.exports = (@robot) ->
       @robot.brain.data.jira_activity.subscription[room] = keys
       @robot.send(sendto, "I've started watching #{key} in #{room}")
 
-  @robot.respond /jira stop watching ([A-Z]+)/, (msg) ->
+  @robot.respond /jira stop watching ([A-Z0-9]+)/, (msg) ->
     key = msg.match[1]
     room = msg.message.user.room
     currentKeys = @robot.brain.data.jira_activity.subscription[room]
@@ -119,11 +119,11 @@ module.exports = (@robot) ->
 
   @robot.respond /jira watching/, (msg) ->
     room = msg.message.user.room
-    currentKeys = @robot.brain.data.jira_activity.subscription[room] || []
+    currentKeys = @robot.brain.data.jira_activity.subscription[room]
     sendto =
       type: 'groupchat'
       room: room
-    @robot.send(sendto, "I am currently watching #{currentKeys.join(', ')} in #{room}")
+    @robot.send(sendto, "I am currently watching #{currentKeys.join(', ') || nothing} in #{room}")
 
   @robot.brain.on 'loaded', =>
     # Internal: Initialize our brain
