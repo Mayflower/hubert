@@ -119,7 +119,7 @@ module.exports = (@robot) ->
 
   @robot.respond /jira watching/, (msg) ->
     room = msg.message.user.room
-    currentKeys = @robot.brain.data.jira_activity.subscription[room]
+    currentKeys = @robot.brain.data.jira_activity.subscription[room] || []
     sendto =
       type: 'groupchat'
       room: room
