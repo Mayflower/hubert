@@ -5,8 +5,15 @@
 #   ent, feedparser
 #
 # Configuration:
-#   HUBOT_JIRA_STREAM_ROOM
-#   HUBOT_JIRA_STREAM_URL
+#   HUBOT_JIRA_URL
+#   HUBOT_JIRA_USER
+#   HUBOT_JIRA_PASSWORD
+#
+# Commands:
+#   hubot jira watch <KEY> - Start watching events project
+#   hubot jira stop watching <KEY> - Stop watching events for the project
+#   hubot jira watching - Show what you're watching
+#
 
 FeedParser      = require('feedparser')
 ent             = require('ent')
