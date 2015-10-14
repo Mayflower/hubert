@@ -286,6 +286,6 @@ words = [
 ]
 module.exports = (robot) ->
     robot.hear /(!videochat)/i, (msg) ->
-        baseurl = "https://videochat.mayflower.de/%-%-%"
+        baseurl = "https://videochat.mayflower.de/%%%"
         videochat = msg.random words
         msg.send baseurl.replace /%/g, ()->msg.random words
