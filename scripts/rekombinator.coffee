@@ -1,7 +1,7 @@
 cheerio = require('cheerio')
 
 module.exports = (robot) ->
-  robot.hear /sprichw*/i, (msg) ->
+  robot.hear /sprichwort/i, (msg) ->
     sprichwort 'http://sprichwortrekombinator.de/', msg
 
   robot.hear /proverb/i, (msg) ->
